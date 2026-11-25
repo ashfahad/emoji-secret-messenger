@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 
@@ -107,6 +109,21 @@ public class EmojiStegoWebServer {
             }
 
             return new String(messageBytes, StandardCharsets.UTF_8);
+        }
+
+        public List<String> splitGraphemeClusters(String text) {
+            List<String> clusters = new ArrayList<>();
+            if (text == null || text.isEmpty()) {
+                return clusters;
+            }
+
+            BreakIterator iterator = BreakIterator.getCharacterInstance(Locale.ROOT);
+            iterator.setText(text);
+            int start = iterator.first();
+            for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
+                clusters.add(text.substring(start, end));
+            }
+            return clusters;
         }
 
         private static void appendByteAsVariationSelectors(StringBuilder out, int value) {
@@ -965,7 +982,6 @@ public class EmojiStegoWebServer {
       const modeLocalBtn = document.getElementById("modeLocalBtn");
       const modeApiBtn = document.getElementById("modeApiBtn");
 
-      // Clear any typed text when focusing a field so placeholder hints stay clean
       [secretInput, carrierInput, decodeInput].forEach((el) => {
         el.addEventListener("focus", () => {
           if (el.value === el.placeholder) {
