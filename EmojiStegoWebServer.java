@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,7 +179,7 @@ public class EmojiStegoWebServer {
         System.out.println("=== StegoGlyph Console CLI ===");
         System.out.println("Commands: encode | decode | exit");
         while (scanner.hasNextLine()) {
-            String cmd = scanner.nextLine().trim().toLowerCase();
+            String cmd = scanner.nextLine().trim().toLowerCase(Locale.ROOT);
             if ("exit".equals(cmd)) {
                 break;
             } else if ("encode".equals(cmd)) {
@@ -205,6 +207,18 @@ public class EmojiStegoWebServer {
         scanner.close();
     }
 
+    private static String loadRootHtml() {
+        try {
+            Path externalHtml = Path.of("stegoglyph.html");
+            if (Files.exists(externalHtml) && Files.isRegularFile(externalHtml)) {
+                return Files.readString(externalHtml, StandardCharsets.UTF_8);
+            }
+        } catch (Exception ignored) {
+            // Fall back to embedded StegoGlyph HTML
+        }
+        return STEGO_GLYPH_HTML;
+    }
+
     private static final class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -213,7 +227,7 @@ public class EmojiStegoWebServer {
                 sendText(exchange, 405, "Method Not Allowed");
                 return;
             }
-            byte[] body = STEGO_GLYPH_HTML.getBytes(StandardCharsets.UTF_8);
+            byte[] body = loadRootHtml().getBytes(StandardCharsets.UTF_8);
             Headers headers = exchange.getResponseHeaders();
             headers.set("Content-Type", "text/html; charset=UTF-8");
             headers.set("Cache-Control", "no-store");
@@ -411,9 +425,7 @@ public class EmojiStegoWebServer {
       --bg-elevated: #101913;
       --border-dim: #182b20;
       --border-green: rgba(0, 255, 127, 0.34);
-      --border-strong: rgba(0, 255, 127, 0.65);
       --green: #00ff7f;
-      --green-soft: #22c55e;
       --green-glow: rgba(0, 255, 127, 0.14);
       --white: #f4f7f5;
       --white-muted: #c2cfc7;
@@ -452,7 +464,7 @@ public class EmojiStegoWebServer {
 
     .app-shell {
       width: 100%;
-      max-width: 1240px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 1rem 1rem 2.5rem;
     }
@@ -561,19 +573,6 @@ public class EmojiStegoWebServer {
       border-color: var(--border-green);
     }
 
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.25rem;
-      align-items: start;
-    }
-
-    @media (min-width: 1024px) {
-      .main-grid {
-        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
-      }
-    }
-
     .codec-stack {
       display: grid;
       grid-template-columns: 1fr;
@@ -622,9 +621,10 @@ public class EmojiStegoWebServer {
 
     .field-label-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: baseline;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 0.4rem 0.75rem;
       margin-bottom: 0.35rem;
     }
 
@@ -635,10 +635,11 @@ public class EmojiStegoWebServer {
       color: var(--white);
     }
 
-    .hint-note {
+    .example-hint {
       font-size: var(--fs-small);
       color: var(--dim);
       font-family: var(--font-mono);
+      user-select: text;
     }
 
     input[type="text"],
@@ -653,12 +654,6 @@ public class EmojiStegoWebServer {
       font-size: var(--fs-ui);
       line-height: 1.5;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    input[type="text"]::placeholder,
-    textarea::placeholder {
-      color: var(--dim);
-      opacity: 1;
     }
 
     input[type="text"]:focus,
@@ -751,72 +746,6 @@ public class EmojiStegoWebServer {
       white-space: pre-wrap;
       min-height: 1.4em;
     }
-
-    .ai-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-    }
-
-    .chat-log {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      max-height: 360px;
-      overflow-y: auto;
-      padding: 0.75rem;
-      background: var(--bg-input);
-      border: 1px solid var(--border-dim);
-      border-radius: 8px;
-    }
-
-    .msg {
-      padding: 0.6rem 0.75rem;
-      border-radius: 8px;
-      font-size: var(--fs-small);
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .msg.bot {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-dim);
-      color: var(--white);
-    }
-
-    .msg.bot strong {
-      color: var(--green);
-      font-family: var(--font-mono);
-    }
-
-    .msg.user {
-      background: rgba(0, 255, 127, 0.08);
-      border: 1px solid var(--border-green);
-      color: var(--green);
-      font-family: var(--font-mono);
-    }
-
-    .chat-form {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .chat-form input {
-      flex: 1;
-    }
-
-    .json-pre {
-      margin: 0;
-      padding: 0.7rem;
-      background: var(--bg-input);
-      border: 1px solid var(--border-dim);
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: var(--fs-small);
-      color: var(--green-soft);
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body>
@@ -835,119 +764,70 @@ public class EmojiStegoWebServer {
       </div>
     </header>
 
-    <main class="main-grid">
-      <div class="codec-stack">
-        <section class="panel" aria-labelledby="encodeHeading">
-          <div class="panel-header">
-            <h2 class="panel-title" id="encodeHeading">// 01. ENCODE PAYLOAD</h2>
-            <span class="panel-tag">CARRIER + MARKERS + XOR</span>
-          </div>
-
-          <div class="field-group">
-            <div class="field-label-row">
-              <label for="secretInput">SECRET MESSAGE</label>
-              <span class="hint-note">Example: Hi Khalid, we will go tomorrow. 🚀</span>
-            </div>
-            <textarea
-              id="secretInput"
-              placeholder="Hi Khalid, we will go tomorrow. 🚀"
-              autocomplete="off"
-            ></textarea>
-            <div class="meta-bar">
-              <span id="secretStats">0 UTF-8 bytes · 0 code points</span>
-              <span class="hint-note">Clears example hint on focus</span>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <div class="field-label-row">
-              <label for="carrierInput">CARRIER EMOJI</label>
-              <span class="hint-note">Example: ✈️😛⁢⁣</span>
-            </div>
-            <input
-              type="text"
-              id="carrierInput"
-              placeholder="✈️😛⁢⁣"
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="action-row">
-            <button type="button" class="btn btn-primary" id="encodeBtn">ENCODE GLYPH</button>
-            <button type="button" class="btn" id="copyEncodedBtn">COPY OUTPUT</button>
-            <button type="button" class="btn" id="sendToDecodeBtn">SEND TO DECODE</button>
-            <button type="button" class="btn" id="clearEncodeBtn">CLEAR</button>
-          </div>
-
-          <div class="output-box" id="encodeOutputBox">
-            <div class="output-label" id="encodeOutputLabel">ENCODED CARRIER STRING</div>
-            <div class="output-value" id="encodeOutputValue">Awaiting payload...</div>
-          </div>
-        </section>
-
-        <section class="panel" aria-labelledby="decodeHeading">
-          <div class="panel-header">
-            <h2 class="panel-title" id="decodeHeading">// 02. DECODE &amp; VERIFY</h2>
-            <span class="panel-tag">CHECKSUM GUARD</span>
-          </div>
-
-          <div class="field-group">
-            <div class="field-label-row">
-              <label for="decodeInput">ENCODED CARRIER INPUT</label>
-              <span class="hint-note">Example: ✈️😛⁢⁣</span>
-            </div>
-            <textarea
-              id="decodeInput"
-              placeholder="✈️😛⁢⁣"
-              autocomplete="off"
-            ></textarea>
-          </div>
-
-          <div class="action-row">
-            <button type="button" class="btn btn-primary" id="decodeBtn">DECODE &amp; VERIFY</button>
-            <button type="button" class="btn" id="copyDecodedBtn">COPY SECRET</button>
-            <button type="button" class="btn" id="clearDecodeBtn">CLEAR</button>
-          </div>
-
-          <div class="output-box" id="decodeOutputBox">
-            <div class="output-label" id="decodeOutputLabel">RECOVERED MESSAGE</div>
-            <div class="output-value" id="decodeOutputValue">Awaiting carrier string...</div>
-          </div>
-        </section>
-      </div>
-
-      <aside class="panel ai-panel" aria-labelledby="aiHeading">
+    <main class="codec-stack">
+      <section class="panel" aria-labelledby="encodeHeading">
         <div class="panel-header">
-          <h2 class="panel-title" id="aiHeading">// 03. STEGO-GLYPH AI</h2>
-          <button type="button" class="btn" id="resetAiBtn">RESET</button>
+          <h2 class="panel-title" id="encodeHeading">// 01. ENCODE PAYLOAD</h2>
+          <span class="panel-tag">CARRIER + MARKERS + XOR</span>
         </div>
 
-        <div class="chat-log" id="aiChatLog">
-          <div class="msg bot">
-            <strong>STEGO-AI:</strong> Ask how variation selectors (<code>U+FE00</code>–<code>U+FE0F</code>), framing markers (<code>U+2062</code> / <code>U+2063</code>), XOR checksums, or the <code>/api/encode</code> and <code>/api/decode</code> endpoints work.
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="secretInput">SECRET MESSAGE</label>
+            <span class="example-hint">Example: Hi Khalid, we will go tomorrow. 🚀</span>
+          </div>
+          <textarea id="secretInput" autocomplete="off"></textarea>
+          <div class="meta-bar">
+            <span id="secretStats">0 UTF-8 bytes · 0 code points</span>
           </div>
         </div>
 
-        <form class="chat-form" id="aiChatForm">
-          <input
-            type="text"
-            id="aiPromptInput"
-            placeholder="Ask about nibbles, checksum, or API..."
-            autocomplete="off"
-          />
-          <button type="submit" class="btn btn-primary">ASK</button>
-        </form>
-
-        <div class="panel-header" style="margin-top: 0.25rem; margin-bottom: 0.4rem; padding-bottom: 0.45rem;">
-          <span class="panel-title" style="font-size: var(--fs-small);">// TELEMETRY / JSON</span>
-          <span class="panel-tag" id="engineBadge">ENGINE: LOCAL</span>
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="carrierInput">CARRIER EMOJI</label>
+            <span class="example-hint">Example: ✈️😛⁢⁣</span>
+          </div>
+          <input type="text" id="carrierInput" autocomplete="off" />
         </div>
-        <pre class="json-pre" id="telemetryJson">{
-  "codec": "Unicode Variation Selectors (U+FE00..U+FE0F)",
-  "markers": ["U+2062", "U+2063"],
-  "checksum": "8-bit rotated XOR (seed 0x5A)"
-}</pre>
-      </aside>
+
+        <div class="action-row">
+          <button type="button" class="btn btn-primary" id="encodeBtn">ENCODE GLYPH</button>
+          <button type="button" class="btn" id="copyEncodedBtn">COPY OUTPUT</button>
+          <button type="button" class="btn" id="sendToDecodeBtn">SEND TO DECODE</button>
+          <button type="button" class="btn" id="clearEncodeBtn">CLEAR</button>
+        </div>
+
+        <div class="output-box" id="encodeOutputBox">
+          <div class="output-label" id="encodeOutputLabel">ENCODED CARRIER STRING</div>
+          <div class="output-value" id="encodeOutputValue">Awaiting payload...</div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="decodeHeading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="decodeHeading">// 02. DECODE &amp; VERIFY</h2>
+          <span class="panel-tag">CHECKSUM GUARD</span>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="decodeInput">ENCODED CARRIER INPUT</label>
+            <span class="example-hint">Example: ✈️😛⁢⁣</span>
+          </div>
+          <textarea id="decodeInput" autocomplete="off"></textarea>
+        </div>
+
+        <div class="action-row">
+          <button type="button" class="btn btn-primary" id="decodeBtn">DECODE &amp; VERIFY</button>
+          <button type="button" class="btn" id="copyDecodedBtn">COPY SECRET</button>
+          <button type="button" class="btn" id="clearDecodeBtn">CLEAR</button>
+        </div>
+
+        <div class="output-box" id="decodeOutputBox">
+          <div class="output-label" id="decodeOutputLabel">RECOVERED MESSAGE</div>
+          <div class="output-value" id="decodeOutputValue">Awaiting carrier string...</div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -977,19 +857,8 @@ public class EmojiStegoWebServer {
       const decodeOutputLabel = document.getElementById("decodeOutputLabel");
       const decodeOutputValue = document.getElementById("decodeOutputValue");
 
-      const telemetryJson = document.getElementById("telemetryJson");
-      const engineBadge = document.getElementById("engineBadge");
       const modeLocalBtn = document.getElementById("modeLocalBtn");
       const modeApiBtn = document.getElementById("modeApiBtn");
-
-      [secretInput, carrierInput, decodeInput].forEach((el) => {
-        el.addEventListener("focus", () => {
-          if (el.value === el.placeholder) {
-            el.value = "";
-          }
-          updateStats();
-        });
-      });
 
       function updateStats() {
         const text = secretInput.value || "";
@@ -1110,7 +979,6 @@ public class EmojiStegoWebServer {
         useServerApi = serverMode;
         modeLocalBtn.classList.toggle("active", !useServerApi);
         modeApiBtn.classList.toggle("active", useServerApi);
-        engineBadge.textContent = useServerApi ? "ENGINE: /API" : "ENGINE: LOCAL";
       }
 
       modeLocalBtn.addEventListener("click", () => setMode(false));
@@ -1127,24 +995,15 @@ public class EmojiStegoWebServer {
               body: JSON.stringify({ secret, carrier })
             });
             const data = await res.json();
-            telemetryJson.textContent = JSON.stringify(data, null, 2);
             if (!res.ok || !data.ok) {
               throw new Error(data.error || "Server encode failed.");
             }
             setEncodeResult(true, data.encoded);
           } else {
-            const encoded = localEncode(secret, carrier);
-            setEncodeResult(true, encoded);
-            telemetryJson.textContent = JSON.stringify({
-              ok: true,
-              mode: "local",
-              codePoints: Array.from(encoded).length,
-              utf8Bytes: encoder.encode(secret).length
-            }, null, 2);
+            setEncodeResult(true, localEncode(secret, carrier));
           }
         } catch (err) {
           setEncodeResult(false, err.message || String(err));
-          telemetryJson.textContent = JSON.stringify({ ok: false, error: err.message || String(err) }, null, 2);
         }
       });
 
@@ -1158,23 +1017,15 @@ public class EmojiStegoWebServer {
               body: JSON.stringify({ encoded: encodedText })
             });
             const data = await res.json();
-            telemetryJson.textContent = JSON.stringify(data, null, 2);
             if (!res.ok || !data.ok) {
               throw new Error(data.error || "Server decode failed.");
             }
             setDecodeResult(true, data.decoded);
           } else {
-            const decoded = localDecode(encodedText);
-            setDecodeResult(true, decoded);
-            telemetryJson.textContent = JSON.stringify({
-              ok: true,
-              mode: "local",
-              decodedCodePoints: Array.from(decoded).length
-            }, null, 2);
+            setDecodeResult(true, localDecode(encodedText));
           }
         } catch (err) {
           setDecodeResult(false, err.message || String(err));
-          telemetryJson.textContent = JSON.stringify({ ok: false, error: err.message || String(err) }, null, 2);
         }
       });
 
@@ -1213,54 +1064,6 @@ public class EmojiStegoWebServer {
         decodeOutputBox.classList.remove("error");
         decodeOutputLabel.textContent = "RECOVERED MESSAGE";
         decodeOutputValue.textContent = "Awaiting carrier string...";
-      });
-
-      const aiChatLog = document.getElementById("aiChatLog");
-      const aiChatForm = document.getElementById("aiChatForm");
-      const aiPromptInput = document.getElementById("aiPromptInput");
-      const resetAiBtn = document.getElementById("resetAiBtn");
-
-      function appendChat(role, text) {
-        const div = document.createElement("div");
-        div.className = "msg " + role;
-        if (role === "bot") {
-          const strong = document.createElement("strong");
-          strong.textContent = "STEGO-AI: ";
-          div.appendChild(strong);
-          div.appendChild(document.createTextNode(text));
-        } else {
-          div.textContent = "> " + text;
-        }
-        aiChatLog.appendChild(div);
-        aiChatLog.scrollTop = aiChatLog.scrollHeight;
-      }
-
-      function answerStegoAi(prompt) {
-        const q = prompt.toLowerCase();
-        if (q.includes("checksum") || q.includes("xor") || q.includes("tamper")) {
-          return "Each UTF-8 byte is split into two 4-bit nibbles mapped to U+FE00..U+FE0F, followed by an 8-bit rotated XOR checksum (seed 0x5A) before U+2063. Flipping a payload selector breaks the checksum and throws an error.";
-        }
-        if (q.includes("marker") || q.includes("2062") || q.includes("2063") || q.includes("invisible")) {
-          return "U+2062 marks the start of the hidden variation-selector stream and U+2063 marks the end, keeping the visible carrier emoji intact.";
-        }
-        if (q.includes("api") || q.includes("server") || q.includes("render") || q.includes("endpoint")) {
-          return "POST /api/encode accepts {\"secret\":\"...\",\"carrier\":\"...\"} and POST /api/decode accepts {\"encoded\":\"...\"}. Toggle SERVER /API at the top to test live backend calls.";
-        }
-        return "StegoGlyph encodes UTF-8 bytes as pairs of Unicode variation selectors (U+FE00..U+FE0F) between U+2062 and U+2063 with an XOR checksum. Ask about checksums, markers, or the /api endpoints.";
-      }
-
-      aiChatForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const prompt = aiPromptInput.value.trim();
-        if (!prompt) return;
-        appendChat("user", prompt);
-        appendChat("bot", answerStegoAi(prompt));
-        aiPromptInput.value = "";
-      });
-
-      resetAiBtn.addEventListener("click", () => {
-        aiChatLog.innerHTML = "";
-        appendChat("bot", "Session reset. Ask about U+FE00..U+FE0F variation selectors, U+2062/U+2063 markers, XOR checksums, or /api endpoints.");
       });
     })();
   </script>
