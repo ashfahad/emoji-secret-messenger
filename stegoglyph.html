@@ -3,915 +3,694 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StegoGlyph // Cyber-Terminal Steganography &amp; AI Console</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>StegoGlyph // Variation-Selector Cyber Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
+      /* Pitch-black, phosphor-green, and crisp-white palette */
       --bg-void: #050806;
-      --bg-panel: #090e0b;
-      --bg-input: #040705;
-      --fg-white: #f4f7f5;
-      --fg-muted: #a6b8ad;
-      --phosphor-bright: #00ff7f;
-      --phosphor-mid: #22c55e;
-      --phosphor-dim: #15803d;
-      --border-subtle: rgba(34, 197, 94, 0.24);
-      --border-active: rgba(0, 255, 127, 0.65);
+      --bg-panel: #0a100c;
+      --bg-input: #070b08;
+      --bg-elevated: #101913;
+      --border-dim: #182b20;
+      --border-green: rgba(0, 255, 127, 0.36);
+      --green: #00ff7f;
+      --green-soft: #22c55e;
+      --green-glow: rgba(0, 255, 127, 0.14);
+      --white: #f4f7f5;
+      --white-muted: #c2cfc7;
+      --dim: #8ca094;
+      --danger: #ff5c77;
+
+      /* Modular typography scale */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --fs-hero: clamp(1.4rem, 2.5vw, 1.9rem);
+      --fs-h2: clamp(1rem, 1.35vw, 1.1875rem);
+      --fs-body: 0.9375rem;
+      --fs-ui: 0.875rem;
+      --fs-small: 0.78125rem;
+      --radius: 10px;
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
     }
 
     html, body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-void);
-      color: var(--fg-white);
-      font-family: 'JetBrains Mono', monospace;
-      overflow-x: hidden;
-    }
-
-    /* Subtle tactical grid backdrop */
-    .cyber-grid-bg {
+      min-height: 100%;
       background-color: var(--bg-void);
       background-image:
-        linear-gradient(to right, rgba(34, 197, 94, 0.045) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(34, 197, 94, 0.045) 1px, transparent 1px),
-        radial-gradient(circle at 80% 10%, rgba(0, 255, 127, 0.07), transparent 45%);
-      background-size: 28px 28px, 28px 28px, 100% 100%;
-    }
-
-    .terminal-panel {
-      background: linear-gradient(180deg, rgba(11, 18, 14, 0.96) 0%, rgba(6, 10, 8, 0.98) 100%);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(244, 247, 245, 0.04);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .terminal-panel:focus-within {
-      border-color: var(--border-active);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 127, 0.16);
-    }
-
-    /* Balanced modular typography ratio (~1.2x scale) */
-    .t-display {
-      font-size: clamp(1.625rem, 2.5vw, 2.25rem); /* 26px - 36px */
-      line-height: 1.15;
-      letter-spacing: -0.025em;
-    }
-
-    .t-h2 {
-      font-size: clamp(1.1875rem, 1.5vw, 1.4375rem); /* 19px - 23px */
-      line-height: 1.28;
-      letter-spacing: -0.015em;
-    }
-
-    .t-h3 {
-      font-size: clamp(1rem, 1.2vw, 1.125rem); /* 16px - 18px */
-      line-height: 1.35;
-    }
-
-    .t-body {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9375rem; /* 15px */
+        radial-gradient(circle at 20% 0%, rgba(0, 255, 127, 0.07), transparent 45%),
+        linear-gradient(to bottom, rgba(34, 197, 94, 0.03) 1px, transparent 1px),
+        linear-gradient(to right, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: var(--fs-body);
       line-height: 1.55;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .t-mono-input {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9375rem; /* 15px */
-      line-height: 1.5;
+    .app-shell {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1rem 1rem 2.5rem;
     }
 
-    .t-ui {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8125rem; /* 13px */
-      line-height: 1.4;
+    @media (min-width: 768px) {
+      .app-shell {
+        padding: 1.75rem 1.5rem 3rem;
+      }
     }
 
-    .t-micro {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem; /* 12px */
-      line-height: 1.35;
-      letter-spacing: 0.04em;
+    /* Top Header Bar */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem 1.25rem;
+      padding: 1rem 1.2rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-green);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+      margin-bottom: 1.35rem;
     }
 
-    .field-surface {
-      background-color: var(--bg-input);
-      color: var(--fg-white);
-      border: 1px solid rgba(34, 197, 94, 0.32);
-      border-radius: 8px;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    .brand-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
     }
 
-    .field-surface:focus {
-      outline: none;
-      border-color: var(--phosphor-bright);
-      box-shadow: 0 0 0 2px rgba(0, 255, 127, 0.18);
+    .brand-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
     }
 
-    .field-surface::placeholder {
-      color: rgba(244, 247, 245, 0.44);
-    }
-
-    .btn-phosphor {
-      background-color: var(--phosphor-bright);
-      color: #040705;
+    .brand-title {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: var(--fs-hero);
       font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1.15;
+    }
+
+    .brand-title span {
+      color: var(--green);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-glow);
+      border: 1px solid var(--border-green);
+      border-radius: 999px;
+      line-height: 1.2;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .brand-sub {
+      margin: 0;
+      font-size: var(--fs-small);
+      color: var(--white-muted);
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1px solid var(--border-dim);
       border-radius: 8px;
-      border: 1px solid var(--phosphor-bright);
-      transition: transform 0.12s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+      padding: 0.2rem;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .mode-btn {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      padding: 0.5rem 0.85rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--white-muted);
       cursor: pointer;
+      transition: all 0.15s ease;
     }
 
-    .btn-phosphor:hover {
-      background-color: #3dff9e;
-      box-shadow: 0 0 18px rgba(0, 255, 127, 0.35);
+    .mode-btn.active {
+      background: var(--green-glow);
+      color: var(--green);
+      border-color: var(--border-green);
     }
 
-    .btn-phosphor:active {
-      transform: scale(0.985);
+    /* Codec Stack */
+    .codec-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.35rem;
     }
 
-    .btn-ghost-terminal {
-      background-color: rgba(6, 10, 8, 0.9);
-      color: var(--fg-white);
-      border: 1px solid rgba(34, 197, 94, 0.36);
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      transition: border-color 0.18s ease;
+    }
+
+    @media (min-width: 768px) {
+      .panel {
+        padding: 1.4rem;
+      }
+    }
+
+    .panel:focus-within {
+      border-color: var(--border-green);
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: var(--fs-h2);
+      font-weight: 600;
+      color: var(--green);
+      letter-spacing: 0.01em;
+    }
+
+    .panel-tag {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      color: var(--white-muted);
+    }
+
+    .field-group {
+      margin-bottom: 1rem;
+    }
+
+    .field-label-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.35rem 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    label {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .example-hint {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      color: var(--dim);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: var(--bg-input);
+      color: var(--white);
+      border: 1px solid var(--border-dim);
       border-radius: 8px;
-      transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+      padding: 0.7rem 0.8rem;
+      font-family: var(--font-mono);
+      font-size: var(--fs-ui);
+      line-height: 1.5;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px rgba(0, 255, 127, 0.14);
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      color: var(--white-muted);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.95rem;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      padding: 0.6rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-dim);
+      background: var(--bg-elevated);
+      color: var(--white);
       cursor: pointer;
+      transition: all 0.15s ease;
     }
 
-    .btn-ghost-terminal:hover {
-      border-color: var(--phosphor-bright);
-      color: var(--phosphor-bright);
-      background-color: rgba(0, 255, 127, 0.06);
+    .btn:hover {
+      border-color: var(--border-green);
+      color: var(--green);
     }
 
-    .pulse-led {
-      width: 8px;
-      height: 8px;
-      border-radius: 9999px;
-      background-color: var(--phosphor-bright);
-      box-shadow: 0 0 10px var(--phosphor-bright);
-      animation: pulseLed 2.2s infinite ease-in-out;
+    .btn-primary {
+      background: var(--green);
+      color: #041109;
+      border-color: var(--green);
     }
 
-    @keyframes pulseLed {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.85); }
+    .btn-primary:hover {
+      background: #33ff99;
+      border-color: #33ff99;
+      color: #041109;
     }
 
-    /* Custom subtle scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .output-box {
+      margin-top: 1rem;
+      padding: 0.8rem 0.9rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border-green);
+      border-radius: 8px;
     }
-    ::-webkit-scrollbar-track {
-      background: #050806;
+
+    .output-box.error {
+      border-color: rgba(255, 92, 119, 0.75);
     }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(34, 197, 94, 0.35);
-      border-radius: 9999px;
+
+    .output-label {
+      font-family: var(--font-mono);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 0.35rem;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--phosphor-bright);
+
+    .output-box.error .output-label {
+      color: var(--danger);
+    }
+
+    .output-value {
+      font-family: var(--font-mono);
+      font-size: var(--fs-ui);
+      color: var(--white);
+      word-break: break-word;
+      white-space: pre-wrap;
+      min-height: 1.4em;
     }
   </style>
 </head>
-<body class="cyber-grid-bg min-h-screen antialiased">
-  <!-- Non-blocking Status Banner (replaces alert()) -->
-  <div id="status-toast" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-96 z-50 hidden" role="status" aria-live="polite">
-    <div class="terminal-panel px-4 py-3 flex items-center justify-between gap-3 border-[#00ff7f]">
-      <div class="flex items-center gap-2.5 t-ui min-w-0">
-        <span id="toast-tag" class="text-[#00ff7f] font-bold shrink-0">[SYS]</span>
-        <span id="toast-text" class="text-[#f4f7f5] break-words"></span>
+<body>
+  <div class="app-shell">
+    <!-- Top Header Bar -->
+    <header class="topbar">
+      <div class="brand-group">
+        <div class="brand-row">
+          <h1 class="brand-title">STEGO<span>GLYPH</span></h1>
+          <span class="status-pill"><span class="status-dot"></span>U+FE00..FE0F</span>
+        </div>
+        <p class="brand-sub">Unicode variation-selector steganography with 8-bit XOR checksum</p>
       </div>
-      <button type="button" onclick="dismissToast()" class="t-micro text-[#a6b8ad] hover:text-[#f4f7f5] px-2 py-1 rounded shrink-0">
-        CLOSE
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Container -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
-    <!-- Top Header & Telemetry -->
-    <header class="terminal-panel p-4 sm:p-6 space-y-5">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div class="space-y-2 min-w-0">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#040705] border border-[#22c55e]/45 t-micro text-[#00ff7f] font-semibold">
-              <span class="pulse-led"></span>
-              STEGO//GLYPH v2.4
-            </span>
-            <span class="t-micro text-[#a6b8ad] uppercase">
-              U+FE00..U+FE0F • XOR-8 INTEGRITY
-            </span>
-          </div>
-          <h1 class="t-display font-bold text-[#f4f7f5]">
-            STEGO<span class="text-[#00ff7f]">GLYPH</span>
-          </h1>
-          <p class="t-body text-[#a6b8ad] max-w-2xl">
-            Conceal UTF-8 messages inside carrier emojis using invisible Unicode variation selectors (`U+2062` / `U+2063` framing + XOR checksum) with an integrated StegoGlyph AI assistant.
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2.5 shrink-0">
-          <button type="button" onclick="resetWorkspace()" class="btn-ghost-terminal px-3.5 py-2.5 t-ui font-medium">
-            Reset Terminal
-          </button>
-        </div>
-      </div>
-
-      <!-- Aligned 4-Card Telemetry Row -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-[#22c55e]/20">
-        <div class="bg-[#040705] border border-[#22c55e]/25 rounded-lg px-3.5 py-3 flex flex-col justify-between gap-1">
-          <span class="t-micro text-[#a6b8ad] uppercase">Carrier CPs</span>
-          <span id="stat-carrier" class="t-h3 font-bold text-[#f4f7f5]">0</span>
-        </div>
-        <div class="bg-[#040705] border border-[#22c55e]/25 rounded-lg px-3.5 py-3 flex flex-col justify-between gap-1">
-          <span class="t-micro text-[#a6b8ad] uppercase">Secret Bytes</span>
-          <span id="stat-bytes" class="t-h3 font-bold text-[#00ff7f]">0 B</span>
-        </div>
-        <div class="bg-[#040705] border border-[#22c55e]/25 rounded-lg px-3.5 py-3 flex flex-col justify-between gap-1">
-          <span class="t-micro text-[#a6b8ad] uppercase">Selector Nibbles</span>
-          <span id="stat-nibbles" class="t-h3 font-bold text-[#f4f7f5]">0</span>
-        </div>
-        <div class="bg-[#040705] border border-[#22c55e]/25 rounded-lg px-3.5 py-3 flex flex-col justify-between gap-1">
-          <span class="t-micro text-[#a6b8ad] uppercase">XOR Checksum</span>
-          <span id="stat-checksum" class="t-h3 font-bold text-[#22c55e]">0x00</span>
-        </div>
+      <div class="mode-switch" role="group" aria-label="Execution mode">
+        <button type="button" class="mode-btn active" id="modeLocalBtn">LOCAL ENGINE</button>
+        <button type="button" class="mode-btn" id="modeApiBtn">SERVER /API</button>
       </div>
     </header>
 
-    <!-- Primary Responsive Split: Encode & Decode (7 cols) | StegoGlyph AI & API (5 cols) -->
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-      <!-- Left Column: Encode + Decode -->
-      <section class="lg:col-span-7 space-y-5 min-w-0">
-        <!-- ENCODE PANEL -->
-        <article class="terminal-panel p-4 sm:p-6 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#22c55e]/20">
-            <div>
-              <p class="t-micro text-[#22c55e] uppercase">01 // Encode</p>
-              <h2 class="t-h2 font-bold text-[#f4f7f5]">Embed Payload in Carrier Emoji</h2>
-            </div>
-            <span class="t-micro px-2.5 py-1 rounded bg-[#040705] border border-[#22c55e]/35 text-[#00ff7f] shrink-0">
-              U+2062 … U+2063
-            </span>
-          </div>
+    <!-- Two Main Codec Panels -->
+    <main class="codec-stack">
+      <!-- 01. ENCODE PAYLOAD -->
+      <section class="panel" aria-labelledby="encodeHeading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="encodeHeading">// 01. ENCODE PAYLOAD</h2>
+          <span class="panel-tag">U+2062 … U+2063 + XOR</span>
+        </div>
 
-          <!-- Carrier Input (Non-clickable example hint only) -->
-          <div class="space-y-1.5">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <label for="encode-carrier" class="t-ui font-semibold text-[#f4f7f5]">
-                Carrier Emoji
-              </label>
-              <span class="t-micro text-[#a6b8ad] select-none pointer-events-none">
-                Example: <span class="text-[#f4f7f5]">✈️😛⁢⁣</span>
-              </span>
-            </div>
-            <input
-              id="encode-carrier"
-              type="text"
-              autocomplete="off"
-              placeholder="Example: ✈️😛⁢⁣"
-              class="field-surface w-full px-3.5 py-2.5 t-mono-input"
-            />
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="secretInput">SECRET MESSAGE</label>
+            <span class="example-hint">Example: Hi Khalid, we will go tomorrow. 🚀</span>
           </div>
+          <textarea id="secretInput" autocomplete="off"></textarea>
+          <div class="meta-bar">
+            <span id="secretStats">0 UTF-8 bytes · 0 code points</span>
+            <span id="statusHint" class="example-hint">Engine: LOCAL ENGINE</span>
+          </div>
+        </div>
 
-          <!-- Secret Message Input (Non-clickable example hint only) -->
-          <div class="space-y-1.5">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <label for="encode-secret" class="t-ui font-semibold text-[#f4f7f5]">
-                Secret Message
-              </label>
-              <span class="t-micro text-[#a6b8ad] select-none pointer-events-none">
-                Example: <span class="text-[#f4f7f5]">Hi Khalid, we will go tomorrow. 🚀</span>
-              </span>
-            </div>
-            <textarea
-              id="encode-secret"
-              rows="3"
-              placeholder="Example: Hi Khalid, we will go tomorrow. 🚀"
-              class="field-surface w-full p-3.5 t-mono-input"
-            ></textarea>
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="carrierInput">CARRIER EMOJI</label>
+            <span class="example-hint">Example: ✈️😛⁢⁣</span>
           </div>
+          <input type="text" id="carrierInput" autocomplete="off" />
+        </div>
 
-          <!-- Encode Actions -->
-          <div class="flex flex-wrap items-center gap-2.5 pt-1">
-            <button type="button" onclick="runEncode()" class="btn-phosphor px-4 py-2.5 t-ui flex-1 sm:flex-initial min-w-[140px]">
-              Encode Glyph
-            </button>
-            <button type="button" onclick="pasteFromClipboard('encode-secret')" class="btn-ghost-terminal px-3.5 py-2.5 t-ui">
-              Paste Secret
-            </button>
-            <button type="button" onclick="clearEncodeInputs()" class="btn-ghost-terminal px-3.5 py-2.5 t-ui">
-              Clear
-            </button>
-          </div>
+        <div class="action-row">
+          <button type="button" class="btn btn-primary" id="encodeBtn">ENCODE GLYPH</button>
+          <button type="button" class="btn" id="copyEncodedBtn">COPY OUTPUT</button>
+          <button type="button" class="btn" id="sendToDecodeBtn">SEND TO DECODE</button>
+          <button type="button" class="btn" id="clearEncodeBtn">CLEAR</button>
+        </div>
 
-          <!-- Encoded Output -->
-          <div class="space-y-2 pt-3 border-t border-[#22c55e]/20">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <label for="encode-output" class="t-ui font-semibold text-[#00ff7f]">
-                Encoded Output
-              </label>
-              <span id="encode-meta" class="t-micro text-[#a6b8ad]">0 code points</span>
-            </div>
-            <textarea
-              id="encode-output"
-              rows="2"
-              readonly
-              placeholder="Encoded stego glyph appears here..."
-              class="field-surface w-full p-3.5 t-mono-input text-[#00ff7f]"
-            ></textarea>
-            <div class="flex flex-wrap items-center gap-2">
-              <button type="button" onclick="copyElementValue('encode-output', 'Encoded stego emoji copied.')" class="btn-ghost-terminal px-3 py-1.5 t-micro font-semibold">
-                Copy Output
-              </button>
-              <button type="button" onclick="routeToDecoder()" class="btn-ghost-terminal px-3 py-1.5 t-micro font-semibold">
-                Send to Decode
-              </button>
-              <button type="button" onclick="toggleSelectorDump()" class="btn-ghost-terminal px-3 py-1.5 t-micro font-semibold">
-                Inspect Code Points
-              </button>
-            </div>
-            <div id="selector-dump" class="hidden bg-[#040705] border border-[#22c55e]/30 rounded-lg p-3 t-micro text-[#a6b8ad] break-all"></div>
-          </div>
-        </article>
-
-        <!-- DECODE PANEL -->
-        <article class="terminal-panel p-4 sm:p-6 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#22c55e]/20">
-            <div>
-              <p class="t-micro text-[#22c55e] uppercase">02 // Decode</p>
-              <h2 class="t-h2 font-bold text-[#f4f7f5]">Extract &amp; Verify Payload</h2>
-            </div>
-            <span id="decode-badge" class="t-micro px-2.5 py-1 rounded bg-[#040705] border border-[#22c55e]/35 text-[#f4f7f5] shrink-0">
-              IDLE
-            </span>
-          </div>
-
-          <div class="space-y-1.5">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <label for="decode-input" class="t-ui font-semibold text-[#f4f7f5]">
-                Stego Carrier Input
-              </label>
-              <span class="t-micro text-[#a6b8ad] select-none pointer-events-none">
-                Example: <span class="text-[#f4f7f5]">✈️😛⁢⁣</span>
-              </span>
-            </div>
-            <textarea
-              id="decode-input"
-              rows="2"
-              placeholder="Example: ✈️😛⁢⁣"
-              class="field-surface w-full p-3.5 t-mono-input"
-            ></textarea>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2.5">
-            <button type="button" onclick="runDecode()" class="btn-phosphor px-4 py-2.5 t-ui flex-1 sm:flex-initial min-w-[140px]">
-              Decode Glyph
-            </button>
-            <button type="button" onclick="pasteFromClipboard('decode-input')" class="btn-ghost-terminal px-3.5 py-2.5 t-ui">
-              Paste Input
-            </button>
-            <button type="button" onclick="clearDecodeInputs()" class="btn-ghost-terminal px-3.5 py-2.5 t-ui">
-              Clear
-            </button>
-          </div>
-
-          <div class="space-y-2 pt-3 border-t border-[#22c55e]/20">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <label for="decode-output" class="t-ui font-semibold text-[#00ff7f]">
-                Decoded Secret
-              </label>
-              <span id="decode-checksum-status" class="t-micro text-[#a6b8ad]">Awaiting verification</span>
-            </div>
-            <textarea
-              id="decode-output"
-              rows="3"
-              readonly
-              placeholder="Example: Hi Khalid, we will go tomorrow. 🚀"
-              class="field-surface w-full p-3.5 t-mono-input text-[#f4f7f5]"
-            ></textarea>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="copyElementValue('decode-output', 'Decoded message copied.')" class="btn-ghost-terminal px-3 py-1.5 t-micro font-semibold">
-                Copy Secret
-              </button>
-            </div>
-          </div>
-        </article>
+        <div class="output-box" id="encodeOutputBox">
+          <div class="output-label" id="encodeOutputLabel">ENCODED CARRIER STRING</div>
+          <div class="output-value" id="encodeOutputValue">Ready.</div>
+        </div>
       </section>
 
-      <!-- Right Column: StegoGlyph AI + API JSON Preview -->
-      <aside class="lg:col-span-5 space-y-5 min-w-0">
-        <!-- STEGO-GLYPH AI PANEL -->
-        <section class="terminal-panel p-4 sm:p-6 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#22c55e]/20">
-            <div>
-              <p class="t-micro text-[#22c55e] uppercase">03 // Assistant</p>
-              <h2 class="t-h2 font-bold text-[#f4f7f5] flex items-center gap-2">
-                <span>StegoGlyph AI</span>
-                <span class="t-micro font-semibold px-2 py-0.5 rounded bg-[#00ff7f]/15 text-[#00ff7f] border border-[#00ff7f]/40">
-                  ACTIVE
-                </span>
-              </h2>
-            </div>
-            <button type="button" onclick="clearAiLog()" class="btn-ghost-terminal px-3 py-1.5 t-micro font-semibold shrink-0">
-              Clear Chat
-            </button>
+      <!-- 02. DECODE & VERIFY -->
+      <section class="panel" aria-labelledby="decodeHeading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="decodeHeading">// 02. DECODE &amp; VERIFY</h2>
+          <span class="panel-tag">CHECKSUM GUARD</span>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label for="decodeInput">ENCODED CARRIER INPUT</label>
+            <span class="example-hint">Example: ✈️😛⁢⁣</span>
           </div>
+          <textarea id="decodeInput" autocomplete="off"></textarea>
+        </div>
 
-          <!-- Non-example tactical prompt triggers -->
-          <div class="flex flex-wrap gap-1.5">
-            <button type="button" onclick="sendAiPrompt('How do variation selectors U+FE00..U+FE0F encode nibbles?')" class="btn-ghost-terminal px-2.5 py-1.5 t-micro">
-              Nibble Encoding
-            </button>
-            <button type="button" onclick="sendAiPrompt('How does the XOR checksum protect against tampering?')" class="btn-ghost-terminal px-2.5 py-1.5 t-micro">
-              XOR Checksum
-            </button>
-            <button type="button" onclick="sendAiPrompt('Estimate payload size for my current secret text.')" class="btn-ghost-terminal px-2.5 py-1.5 t-micro">
-              Payload Size
-            </button>
-          </div>
+        <div class="action-row">
+          <button type="button" class="btn btn-primary" id="decodeBtn">DECODE &amp; VERIFY</button>
+          <button type="button" class="btn" id="copyDecodedBtn">COPY SECRET</button>
+          <button type="button" class="btn" id="clearDecodeBtn">CLEAR</button>
+        </div>
 
-          <div id="ai-log" class="bg-[#040705] border border-[#22c55e]/25 rounded-lg p-3.5 h-72 sm:h-80 overflow-y-auto space-y-3">
-            <div class="border-l-2 border-[#00ff7f] pl-3 space-y-1">
-              <div class="t-micro font-bold text-[#00ff7f]">STEGO-AI // ONLINE</div>
-              <p class="t-body text-[#f4f7f5]">
-                Ready to assist with variation-selector encoding, framing markers (<span class="t-micro text-[#00ff7f]">U+2062</span> / <span class="t-micro text-[#00ff7f]">U+2063</span>), checksum validation, and payload sizing.
-              </p>
-            </div>
-          </div>
-
-          <form onsubmit="onAiFormSubmit(event)" class="flex flex-col sm:flex-row gap-2">
-            <input
-              id="ai-input"
-              type="text"
-              placeholder="Ask StegoGlyph AI..."
-              class="field-surface flex-1 px-3.5 py-2.5 t-ui"
-            />
-            <button type="submit" class="btn-phosphor px-4 py-2.5 t-ui shrink-0">
-              Ask AI
-            </button>
-          </form>
-        </section>
-
-        <!-- API ENDPOINT PREVIEW -->
-        <section class="terminal-panel p-4 sm:p-6 space-y-3.5">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#22c55e]/20">
-            <div>
-              <p class="t-micro text-[#22c55e] uppercase">04 // Web API</p>
-              <h3 class="t-h3 font-bold text-[#f4f7f5]">Endpoint Payload Mirror</h3>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" id="btn-tab-encode" onclick="setApiEndpoint('encode')" class="btn-ghost-terminal px-2.5 py-1.5 t-micro font-semibold text-[#00ff7f] border-[#00ff7f]">
-                /api/encode
-              </button>
-              <button type="button" id="btn-tab-decode" onclick="setApiEndpoint('decode')" class="btn-ghost-terminal px-2.5 py-1.5 t-micro">
-                /api/decode
-              </button>
-            </div>
-          </div>
-
-          <pre id="api-preview" class="bg-[#040705] border border-[#22c55e]/25 rounded-lg p-3.5 t-micro text-[#f4f7f5] overflow-x-auto"></pre>
-
-          <div class="flex items-center justify-between gap-2 t-micro text-[#a6b8ad]">
-            <span>Server Port: 8080 ($PORT)</span>
-            <button type="button" onclick="copyElementValue('api-preview', 'JSON payload copied.')" class="text-[#00ff7f] hover:underline font-semibold">
-              Copy JSON
-            </button>
-          </div>
-        </section>
-      </aside>
+        <div class="output-box" id="decodeOutputBox">
+          <div class="output-label" id="decodeOutputLabel">RECOVERED MESSAGE</div>
+          <div class="output-value" id="decodeOutputValue">Ready.</div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
-    const START_MARKER = 0x2062; // Invisible Times
-    const END_MARKER = 0x2063;   // Invisible Separator
-    const VS_BASE = 0xFE00;      // Variation Selector-1 .. Variation Selector-16 (0xFE00..0xFE0F)
-    const EXAMPLE_HINTS = new Set([
-      'Example: ✈️😛\u2062\u2063',
-      'Example: Hi Khalid, we will go tomorrow. 🚀'
-    ]);
+    (function () {
+      const START_MARKER = 0x2062; // INVISIBLE TIMES
+      const END_MARKER = 0x2063;   // INVISIBLE SEPARATOR
+      const VS_BASE = 0xFE00;      // VARIATION SELECTOR-1..16 (0xFE00..0xFE0F)
 
-    let currentApiTab = 'encode';
-    let toastTimer = null;
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder("utf-8", { fatal: true });
 
-    function showToast(message, isError = false) {
-      const toast = document.getElementById('status-toast');
-      const tag = document.getElementById('toast-tag');
-      const text = document.getElementById('toast-text');
-      tag.textContent = isError ? '[ERR]' : '[SYS]';
-      tag.className = isError ? 'text-red-400 font-bold shrink-0' : 'text-[#00ff7f] font-bold shrink-0';
-      text.textContent = message;
-      toast.classList.remove('hidden');
+      let useServerApi = false;
+      let lastEncodedValue = "";
+      let lastDecodedValue = "";
 
-      if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3400);
-    }
+      const secretInput = document.getElementById("secretInput");
+      const carrierInput = document.getElementById("carrierInput");
+      const decodeInput = document.getElementById("decodeInput");
+      const secretStats = document.getElementById("secretStats");
+      const statusHint = document.getElementById("statusHint");
 
-    function dismissToast() {
-      if (toastTimer) clearTimeout(toastTimer);
-      document.getElementById('status-toast').classList.add('hidden');
-    }
+      const encodeOutputBox = document.getElementById("encodeOutputBox");
+      const encodeOutputLabel = document.getElementById("encodeOutputLabel");
+      const encodeOutputValue = document.getElementById("encodeOutputValue");
 
-    function toCodePoints(str) {
-      const cps = [];
-      if (!str) return cps;
-      for (let i = 0; i < str.length; ) {
-        const cp = str.codePointAt(i);
-        cps.push(cp);
-        i += CharacterCharCount(cp);
-      }
-      return cps;
-    }
+      const decodeOutputBox = document.getElementById("decodeOutputBox");
+      const decodeOutputLabel = document.getElementById("decodeOutputLabel");
+      const decodeOutputValue = document.getElementById("decodeOutputValue");
 
-    function CharacterCharCount(cp) {
-      return cp >= 0x10000 ? 2 : 1;
-    }
+      const modeLocalBtn = document.getElementById("modeLocalBtn");
+      const modeApiBtn = document.getElementById("modeApiBtn");
 
-    function computeXorChecksum(bytes) {
-      let acc = 0x5A;
-      for (let i = 0; i < bytes.length; i++) {
-        acc = ((acc ^ bytes[i]) + (i & 0x0F)) & 0xFF;
-      }
-      return acc;
-    }
-
-    function encodeStego(secret, carrier) {
-      if (!carrier || !carrier.trim()) {
-        throw new Error('Carrier emoji is required.');
-      }
-      if (!secret || secret.length === 0) {
-        throw new Error('Secret message cannot be empty.');
+      function updateStats() {
+        const text = secretInput.value || "";
+        const bytes = encoder.encode(text).length;
+        const cps = Array.from(text).length;
+        secretStats.textContent = `${bytes} UTF-8 bytes · ${cps} code points`;
       }
 
-      const utf8Bytes = new TextEncoder().encode(secret);
-      const checksum = computeXorChecksum(utf8Bytes);
+      secretInput.addEventListener("input", updateStats);
+      updateStats();
 
-      const framedBytes = new Uint8Array(utf8Bytes.length + 1);
-      framedBytes.set(utf8Bytes, 0);
-      framedBytes[utf8Bytes.length] = checksum;
-
-      let out = carrier;
-      out += String.fromCodePoint(START_MARKER);
-
-      for (let i = 0; i < framedBytes.length; i++) {
-        const b = framedBytes[i];
-        const highNibble = (b >>> 4) & 0x0F;
-        const lowNibble = b & 0x0F;
-        out += String.fromCodePoint(VS_BASE + highNibble);
-        out += String.fromCodePoint(VS_BASE + lowNibble);
-      }
-
-      out += String.fromCodePoint(END_MARKER);
-      return out;
-    }
-
-    function decodeStego(stegoText) {
-      if (!stegoText || typeof stegoText !== 'string') {
-        throw new Error('No stego string provided.');
-      }
-
-      const cps = toCodePoints(stegoText);
-      const startIdx = cps.indexOf(START_MARKER);
-      const endIdx = cps.indexOf(END_MARKER, startIdx + 1);
-
-      if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx + 1) {
-        throw new Error('Missing valid U+2062 / U+2063 steganography framing markers.');
-      }
-
-      const nibbles = [];
-      for (let i = startIdx + 1; i < endIdx; i++) {
-        const cp = cps[i];
-        if (cp < VS_BASE || cp > VS_BASE + 0x0F) {
-          throw new Error('Unexpected non-selector code point inside payload.');
+      // 8-bit rotated XOR checksum with seed 0x5A
+      function computeChecksum(bytes) {
+        let xor = 0x5A;
+        for (let i = 0; i < bytes.length; i++) {
+          xor ^= (bytes[i] & 0xFF);
+          xor = ((xor << 1) | (xor >>> 7)) & 0xFF;
         }
-        nibbles.push(cp - VS_BASE);
+        return xor;
       }
 
-      if (nibbles.length < 4 || nibbles.length % 2 !== 0) {
-        throw new Error('Corrupted nibble stream length.');
+      function appendByteAsSelectors(out, byteVal) {
+        const high = (byteVal >>> 4) & 0x0F;
+        const low = byteVal & 0x0F;
+        out.push(String.fromCodePoint(VS_BASE + high));
+        out.push(String.fromCodePoint(VS_BASE + low));
       }
 
-      const totalBytes = nibbles.length / 2;
-      const rawBytes = new Uint8Array(totalBytes);
-      for (let i = 0; i < totalBytes; i++) {
-        rawBytes[i] = (nibbles[i * 2] << 4) | nibbles[i * 2 + 1];
+      function localEncode(secret, carrier) {
+        if (!secret) {
+          throw new Error("Secret message cannot be empty.");
+        }
+        if (!carrier || !carrier.trim()) {
+          throw new Error("Carrier emoji cannot be empty.");
+        }
+        const utf8 = encoder.encode(secret);
+        const checksum = computeChecksum(utf8);
+        const parts = [carrier, String.fromCodePoint(START_MARKER)];
+        for (let i = 0; i < utf8.length; i++) {
+          appendByteAsSelectors(parts, utf8[i]);
+        }
+        appendByteAsSelectors(parts, checksum);
+        parts.push(String.fromCodePoint(END_MARKER));
+        return parts.join("");
       }
 
-      const payloadBytes = rawBytes.slice(0, totalBytes - 1);
-      const receivedChecksum = rawBytes[totalBytes - 1];
-      const expectedChecksum = computeXorChecksum(payloadBytes);
+      function localDecode(encodedText) {
+        if (!encodedText) {
+          throw new Error("Input text is empty.");
+        }
+        const cps = Array.from(encodedText).map((ch) => ch.codePointAt(0));
+        let startIdx = -1;
+        let endIdx = -1;
 
-      if (receivedChecksum !== expectedChecksum) {
-        throw new Error(
-          `XOR checksum mismatch (expected 0x${expectedChecksum.toString(16).toUpperCase().padStart(2, '0')}, got 0x${receivedChecksum.toString(16).toUpperCase().padStart(2, '0')}).`
-        );
-      }
-
-      const decoded = new TextDecoder('utf-8', { fatal: true }).decode(payloadBytes);
-      return {
-        message: decoded,
-        checksum: expectedChecksum,
-        byteCount: payloadBytes.length
-      };
-    }
-
-    function runEncode() {
-      const carrier = document.getElementById('encode-carrier').value;
-      const secret = document.getElementById('encode-secret').value;
-      const outputEl = document.getElementById('encode-output');
-      const metaEl = document.getElementById('encode-meta');
-
-      try {
-        const encoded = encodeStego(secret, carrier);
-        outputEl.value = encoded;
-        const cpCount = toCodePoints(encoded).length;
-        metaEl.textContent = `${cpCount} total code points`;
-        document.getElementById('selector-dump').classList.add('hidden');
-        updateMetrics();
-        showToast('Secret encoded into carrier glyph.');
-      } catch (err) {
-        showToast(err.message, true);
-      }
-    }
-
-    function runDecode() {
-      const input = document.getElementById('decode-input').value;
-      const outEl = document.getElementById('decode-output');
-      const badgeEl = document.getElementById('decode-badge');
-      const statusEl = document.getElementById('decode-checksum-status');
-
-      try {
-        const res = decodeStego(input);
-        outEl.value = res.message;
-        badgeEl.textContent = 'VERIFIED';
-        badgeEl.className = 't-micro px-2.5 py-1 rounded bg-[#00ff7f]/15 border border-[#00ff7f] text-[#00ff7f] font-semibold shrink-0';
-        statusEl.textContent = `XOR 0x${res.checksum.toString(16).toUpperCase().padStart(2, '0')} OK (${res.byteCount} B)`;
-        statusEl.className = 't-micro text-[#00ff7f]';
-        updateApiMirror();
-        showToast('Payload decoded and XOR checksum verified.');
-      } catch (err) {
-        outEl.value = '';
-        badgeEl.textContent = 'REJECTED';
-        badgeEl.className = 't-micro px-2.5 py-1 rounded bg-red-950/70 border border-red-500 text-red-300 font-semibold shrink-0';
-        statusEl.textContent = err.message;
-        statusEl.className = 't-micro text-red-400';
-        updateApiMirror();
-        showToast(err.message, true);
-      }
-    }
-
-    function routeToDecoder() {
-      const encoded = document.getElementById('encode-output').value;
-      if (!encoded) {
-        showToast('Encode a payload first before sending to decoder.', true);
-        return;
-      }
-      document.getElementById('decode-input').value = encoded;
-      runDecode();
-    }
-
-    function toggleSelectorDump() {
-      const box = document.getElementById('selector-dump');
-      if (!box.classList.contains('hidden')) {
-        box.classList.add('hidden');
-        return;
-      }
-      const val = document.getElementById('encode-output').value || document.getElementById('decode-input').value;
-      if (!val) {
-        showToast('No encoded string available to inspect.', true);
-        return;
-      }
-      const cps = toCodePoints(val).map((cp) => 'U+' + cp.toString(16).toUpperCase().padStart(4, '0'));
-      box.textContent = cps.join(' ');
-      box.classList.remove('hidden');
-    }
-
-    function clearEncodeInputs() {
-      document.getElementById('encode-carrier').value = '';
-      document.getElementById('encode-secret').value = '';
-      document.getElementById('encode-output').value = '';
-      document.getElementById('encode-meta').textContent = '0 code points';
-      document.getElementById('selector-dump').classList.add('hidden');
-      updateMetrics();
-    }
-
-    function clearDecodeInputs() {
-      document.getElementById('decode-input').value = '';
-      document.getElementById('decode-output').value = '';
-      document.getElementById('decode-badge').textContent = 'IDLE';
-      document.getElementById('decode-badge').className = 't-micro px-2.5 py-1 rounded bg-[#040705] border border-[#22c55e]/35 text-[#f4f7f5] shrink-0';
-      document.getElementById('decode-checksum-status').textContent = 'Awaiting verification';
-      document.getElementById('decode-checksum-status').className = 't-micro text-[#a6b8ad]';
-      updateApiMirror();
-    }
-
-    function resetWorkspace() {
-      clearEncodeInputs();
-      clearDecodeInputs();
-      showToast('Terminal cleared.');
-    }
-
-    async function pasteFromClipboard(targetId) {
-      const el = document.getElementById(targetId);
-      el.focus();
-      try {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          const text = await navigator.clipboard.readText();
-          if (text) {
-            el.value = text;
-            updateMetrics();
-            showToast('Pasted from clipboard.');
-            return;
+        for (let i = 0; i < cps.length; i++) {
+          if (cps[i] === START_MARKER && startIdx === -1) {
+            startIdx = i;
+          } else if (cps[i] === END_MARKER && startIdx !== -1) {
+            endIdx = i;
+            break;
           }
         }
-        showToast('Click inside the field and press Ctrl+V / Cmd+V to paste.');
-      } catch (_) {
-        showToast('Clipboard permission blocked; use Ctrl+V / Cmd+V.', true);
-      }
-    }
 
-    function copyElementValue(elementId, successMsg) {
-      const el = document.getElementById(elementId);
-      const text = el.value !== undefined ? el.value : el.textContent;
-      if (!text) {
-        showToast('Nothing to copy.', true);
-        return;
-      }
+        if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx + 1) {
+          throw new Error("No valid StegoGlyph payload markers found.");
+        }
 
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(
-          () => showToast(successMsg),
-          () => fallbackCopy(text, successMsg)
-        );
-      } else {
-        fallbackCopy(text, successMsg);
-      }
-    }
-
-    function fallbackCopy(text, successMsg) {
-      const helper = document.createElement('textarea');
-      helper.value = text;
-      helper.style.position = 'fixed';
-      helper.style.opacity = '0';
-      document.body.appendChild(helper);
-      helper.select();
-      try {
-        document.execCommand('copy');
-        showToast(successMsg);
-      } catch (_) {
-        showToast('Copy failed in browser.', true);
-      } finally {
-        document.body.removeChild(helper);
-      }
-    }
-
-    function updateMetrics() {
-      const carrier = document.getElementById('encode-carrier').value;
-      const secret = document.getElementById('encode-secret').value;
-      const carrierCount = toCodePoints(carrier).length;
-      const bytes = new TextEncoder().encode(secret);
-      const nibbles = secret.length > 0 ? (bytes.length + 1) * 2 : 0;
-      const checksum = computeXorChecksum(bytes);
-
-      document.getElementById('stat-carrier').textContent = String(carrierCount);
-      document.getElementById('stat-bytes').textContent = `${bytes.length} B`;
-      document.getElementById('stat-nibbles').textContent = String(nibbles);
-      document.getElementById('stat-checksum').textContent = '0x' + checksum.toString(16).toUpperCase().padStart(2, '0');
-      updateApiMirror();
-    }
-
-    function setApiEndpoint(tab) {
-      currentApiTab = tab;
-      const encBtn = document.getElementById('btn-tab-encode');
-      const decBtn = document.getElementById('btn-tab-decode');
-
-      if (tab === 'encode') {
-        encBtn.className = 'btn-ghost-terminal px-2.5 py-1.5 t-micro font-semibold text-[#00ff7f] border-[#00ff7f]';
-        decBtn.className = 'btn-ghost-terminal px-2.5 py-1.5 t-micro';
-      } else {
-        decBtn.className = 'btn-ghost-terminal px-2.5 py-1.5 t-micro font-semibold text-[#00ff7f] border-[#00ff7f]';
-        encBtn.className = 'btn-ghost-terminal px-2.5 py-1.5 t-micro';
-      }
-      updateApiMirror();
-    }
-
-    function updateApiMirror() {
-      const preview = document.getElementById('api-preview');
-      const carrier = document.getElementById('encode-carrier').value;
-      const secret = document.getElementById('encode-secret').value;
-      const encoded = document.getElementById('encode-output').value;
-      const decodeIn = document.getElementById('decode-input').value;
-      const decodedOut = document.getElementById('decode-output').value;
-
-      if (currentApiTab === 'encode') {
-        preview.textContent = JSON.stringify({
-          endpoint: 'POST /api/encode',
-          body: {
-            carrier: carrier || '✈️😛\u2062\u2063',
-            secret: secret || 'Hi Khalid, we will go tomorrow. 🚀'
-          },
-          response: {
-            ok: Boolean(encoded),
-            length: encoded.length
+        const nibbles = [];
+        for (let i = startIdx + 1; i < endIdx; i++) {
+          const cp = cps[i];
+          if (cp >= VS_BASE && cp < VS_BASE + 16) {
+            nibbles.push(cp - VS_BASE);
+          } else {
+            throw new Error("Unexpected non-selector code point inside payload.");
           }
-        }, null, 2);
-      } else {
-        preview.textContent = JSON.stringify({
-          endpoint: 'POST /api/decode',
-          body: {
-            stego: decodeIn || encoded || '✈️😛\u2062\u2063'
-          },
-          response: {
-            ok: Boolean(decodedOut),
-            message: decodedOut || ''
+        }
+
+        if (nibbles.length < 4 || nibbles.length % 2 !== 0) {
+          throw new Error("Corrupted StegoGlyph nibble stream.");
+        }
+
+        const totalBytes = nibbles.length / 2;
+        const allBytes = new Uint8Array(totalBytes);
+        for (let i = 0; i < totalBytes; i++) {
+          allBytes[i] = ((nibbles[i * 2] << 4) | nibbles[i * 2 + 1]) & 0xFF;
+        }
+
+        const msgLen = totalBytes - 1;
+        const msgBytes = allBytes.slice(0, msgLen);
+        const expectedChecksum = allBytes[msgLen];
+        const actualChecksum = computeChecksum(msgBytes);
+
+        if (actualChecksum !== expectedChecksum) {
+          throw new Error("Checksum mismatch: message may be corrupted or tampered.");
+        }
+
+        return decoder.decode(msgBytes);
+      }
+
+      function setEncodeResult(ok, text) {
+        encodeOutputBox.classList.toggle("error", !ok);
+        encodeOutputLabel.textContent = ok ? "ENCODED CARRIER STRING" : "ENCODE ERROR";
+        encodeOutputValue.textContent = text;
+        if (ok) {
+          lastEncodedValue = text;
+        }
+      }
+
+      function setDecodeResult(ok, text) {
+        decodeOutputBox.classList.toggle("error", !ok);
+        decodeOutputLabel.textContent = ok ? "RECOVERED MESSAGE" : "DECODE ERROR";
+        decodeOutputValue.textContent = text;
+        if (ok) {
+          lastDecodedValue = text;
+        }
+      }
+
+      function setMode(serverMode) {
+        useServerApi = serverMode;
+        modeLocalBtn.classList.toggle("active", !useServerApi);
+        modeApiBtn.classList.toggle("active", useServerApi);
+        statusHint.textContent = useServerApi ? "Engine: SERVER /API" : "Engine: LOCAL ENGINE";
+      }
+
+      modeLocalBtn.addEventListener("click", () => setMode(false));
+      modeApiBtn.addEventListener("click", () => setMode(true));
+
+      document.getElementById("encodeBtn").addEventListener("click", async () => {
+        const secret = secretInput.value;
+        const carrier = carrierInput.value;
+        try {
+          if (useServerApi) {
+            const res = await fetch("/api/encode", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ secret, carrier })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+              throw new Error(data.error || "Server encode failed.");
+            }
+            setEncodeResult(true, data.encoded);
+          } else {
+            const encoded = localEncode(secret, carrier);
+            setEncodeResult(true, encoded);
           }
-        }, null, 2);
+        } catch (err) {
+          setEncodeResult(false, err.message || String(err));
+        }
+      });
+
+      document.getElementById("decodeBtn").addEventListener("click", async () => {
+        const encodedText = decodeInput.value;
+        try {
+          if (useServerApi) {
+            const res = await fetch("/api/decode", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ encoded: encodedText })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+              throw new Error(data.error || "Server decode failed.");
+            }
+            setDecodeResult(true, data.decoded);
+          } else {
+            const decoded = localDecode(encodedText);
+            setDecodeResult(true, decoded);
+          }
+        } catch (err) {
+          setDecodeResult(false, err.message || String(err));
+        }
+      });
+
+      document.getElementById("sendToDecodeBtn").addEventListener("click", () => {
+        if (lastEncodedValue) {
+          decodeInput.value = lastEncodedValue;
+          decodeInput.focus();
+        }
+      });
+
+      function copyText(text) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+        }
       }
-    }
 
-    /* StegoGlyph AI Assistant */
-    function escapeText(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
+      document.getElementById("copyEncodedBtn").addEventListener("click", () => {
+        copyText(lastEncodedValue);
+      });
 
-    function appendAiMessage(sender, htmlBody, isUser) {
-      const log = document.getElementById('ai-log');
-      const entry = document.createElement('div');
-      entry.className = isUser
-        ? 'border-l-2 border-[#f4f7f5] pl-3 space-y-1'
-        : 'border-l-2 border-[#00ff7f] pl-3 space-y-1';
+      document.getElementById("copyDecodedBtn").addEventListener("click", () => {
+        copyText(lastDecodedValue);
+      });
 
-      const headerClass = isUser
-        ? 't-micro font-bold text-[#f4f7f5]'
-        : 't-micro font-bold text-[#00ff7f]';
+      document.getElementById("clearEncodeBtn").addEventListener("click", () => {
+        secretInput.value = "";
+        carrierInput.value = "";
+        lastEncodedValue = "";
+        encodeOutputBox.classList.remove("error");
+        encodeOutputLabel.textContent = "ENCODED CARRIER STRING";
+        encodeOutputValue.textContent = "Ready.";
+        updateStats();
+      });
 
-      entry.innerHTML = `
-        <div class="${headerClass}">${escapeText(sender)}</div>
-        <div class="t-body text-[#f4f7f5]">${htmlBody}</div>
-      `;
-      log.appendChild(entry);
-      log.scrollTop = log.scrollHeight;
-    }
-
-    function generateAiReply(question) {
-      const q = question.toLowerCase();
-      const secret = document.getElementById('encode-secret').value;
-      const bytes = new TextEncoder().encode(secret);
-      const nibbles = secret.length > 0 ? (bytes.length + 1) * 2 : 0;
-      const checksum = '0x' + computeXorChecksum(bytes).toString(16).toUpperCase().padStart(2, '0');
-
-      if (q.includes('nibble') || q.includes('fe00') || q.includes('selector')) {
-        return 'Each UTF-8 byte is split into two 4-bit nibbles (high and low) and mapped to <span class="t-micro text-[#00ff7f]">U+FE00..U+FE0F</span>. Framing markers <span class="t-micro text-[#00ff7f]">U+2062</span> and <span class="t-micro text-[#00ff7f]">U+2063</span> delimit the hidden stream after the visible carrier emoji.';
-      }
-      if (q.includes('checksum') || q.includes('xor') || q.includes('tamper')) {
-        return 'A 1-byte XOR checksum is appended to the UTF-8 payload before nibble encoding. When decoded, any flipped variation selector or truncated nibble changes the computed checksum and rejects the payload.';
-      }
-      if (q.includes('size') || q.includes('payload') || q.includes('capacity')) {
-        return `Current draft uses <span class="t-micro text-[#00ff7f]">${bytes.length} B</span> UTF-8, <span class="t-micro text-[#00ff7f]">${nibbles}</span> variation selectors (including the checksum byte), and checksum <span class="t-micro text-[#00ff7f]">${checksum}</span>.`;
-      }
-      return `StegoGlyph uses <span class="t-micro text-[#00ff7f]">U+FE00..U+FE0F</span> nibbles between <span class="t-micro text-[#00ff7f]">U+2062</span> and <span class="t-micro text-[#00ff7f]">U+2063</span> with XOR verification. Current draft: <span class="t-micro text-[#00ff7f]">${bytes.length} B</span> / <span class="t-micro text-[#00ff7f]">${checksum}</span>.`;
-    }
-
-    function sendAiPrompt(promptText) {
-      const cleaned = (promptText || '').trim();
-      if (!cleaned) return;
-      appendAiMessage('OPERATOR', escapeText(cleaned), true);
-      appendAiMessage('STEGO-AI', generateAiReply(cleaned), false);
-    }
-
-    function onAiFormSubmit(event) {
-      event.preventDefault();
-      const input = document.getElementById('ai-input');
-      const text = input.value;
-      if (!text.trim()) return;
-      input.value = '';
-      sendAiPrompt(text);
-    }
-
-    function clearAiLog() {
-      const log = document.getElementById('ai-log');
-      log.innerHTML = `
-        <div class="border-l-2 border-[#00ff7f] pl-3 space-y-1">
-          <div class="t-micro font-bold text-[#00ff7f]">STEGO-AI // ONLINE</div>
-          <p class="t-body text-[#f4f7f5]">
-            Log cleared. Ask about variation selectors, XOR checksums, or payload sizing.
-          </p>
-        </div>
-      `;
-    }
+      document.getElementById("clearDecodeBtn").addEventListener("click", () => {
+        decodeInput.value = "";
+        lastDecodedValue = "";
+        decodeOutputBox.classList.remove("error");
+        decodeOutputLabel.textContent = "RECOVERED MESSAGE";
+        decodeOutputValue.textContent = "Ready.";
+      });
+    })();
+  </script>
+</body>
+</html>
