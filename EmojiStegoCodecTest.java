@@ -50,22 +50,25 @@ public class EmojiStegoCodecTest {
         assertThrowsIllegalArgument(() -> codec.encode("Hello", "   "), "Blank carrier should fail");
     }
 
-    void detectsCorruptedNibbleViaChecksum() {
+void detectsCorruptedNibbleViaChecksum() {
         String encoded = codec.encode("Hi Khalid, we will go tomorrow.", "✈️😛");
 
         List<Integer> codePoints = new ArrayList<Integer>();
+        boolean seenStart = false;
         boolean flipped = false;
         for (int i = 0; i < encoded.length(); ) {
             int cp = encoded.codePointAt(i);
             i += Character.charCount(cp);
-            if (!flipped && cp >= 0xFE00 && cp <= 0xFE0F) {
+            if (cp == 0x2062) {
+                seenStart = true;
+            } else if (seenStart && !flipped && cp >= 0xFE00 && cp <= 0xFE0F) {
                 cp = (cp == 0xFE00) ? 0xFE01 : 0xFE00;
                 flipped = true;
             }
             codePoints.add(cp);
         }
 
-        assertTrue(flipped, "Expected at least one variation selector nibble in encoded output");
+        assertTrue(flipped, "Expected at least one variation selector nibble in payload");
 
         StringBuilder tampered = new StringBuilder();
         for (int cp : codePoints) {
@@ -74,7 +77,7 @@ public class EmojiStegoCodecTest {
 
         assertThrowsIllegalArgument(() -> codec.decode(tampered.toString()), "Tampered nibble should fail checksum");
     }
-
+    
     void detectsTruncatedPayloadMissingEndMarker() {
         String encoded = codec.encode("Secret message", "😛");
         int endMarkerCp = 0x2063;
